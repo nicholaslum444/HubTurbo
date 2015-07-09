@@ -92,6 +92,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
             // Select that item
             getSelectionModel().clearAndSelect(index);
             selectedIndex = Optional.of(index);
+            scrollAndShow(index);
             // Do not trigger event; selection did not conceptually change
         } else {
             // The item disappeared
@@ -109,6 +110,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
 
                 // The next item will be considered selected
                 onItemSelected.accept(nextIndex);
+                scrollAndShow(nextIndex);
             }
         }
     }
