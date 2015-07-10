@@ -1,5 +1,6 @@
 package ui.components;
 
+import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +28,7 @@ import java.util.function.IntConsumer;
  *
  * @param <T> The type of the item in the list
  */
-public abstract class NavigableListView<T> extends ScrollableListView<T> {
+public abstract class NavigableListView<T> extends ListView<T> {
 
     private static final Logger logger = LogManager.getLogger(NavigableListView.class.getName());
 
@@ -92,7 +93,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
             // Select that item
             getSelectionModel().clearAndSelect(index);
             selectedIndex = Optional.of(index);
-            scrollAndShow(index);
+            scrollTo(index);
             // Do not trigger event; selection did not conceptually change
         } else {
             // The item disappeared
@@ -110,7 +111,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
 
                 // The next item will be considered selected
                 onItemSelected.accept(nextIndex);
-                scrollAndShow(nextIndex);
+                scrollTo(nextIndex);
             }
         }
     }
@@ -180,7 +181,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
         selectedIndex = Optional.of(newIndex);
 
         // Ensure that the newly-selected item is in view
-        scrollAndShow(newIndex);
+        scrollTo(newIndex);
     }
 
     public void setOnItemSelected(IntConsumer callback) {
@@ -191,7 +192,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
         requestFocus();
         if (getItems().size() == 0) return;
         getSelectionModel().clearAndSelect(0);
-        scrollAndShow(0);
+        scrollTo(0);
         selectedIndex = Optional.of(0);
         onItemSelected.accept(selectedIndex.get());
     }
@@ -200,7 +201,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
         requestFocus();
         if (getItems().size() == 0) return;
         getSelectionModel().clearAndSelect(getItems().size() - 1);
-        scrollAndShow(getItems().size() - 1);
+        scrollTo(getItems().size() - 1);
         selectedIndex = Optional.of(getItems().size() - 1);
         onItemSelected.accept(selectedIndex.get());
     }
@@ -209,7 +210,7 @@ public abstract class NavigableListView<T> extends ScrollableListView<T> {
        requestFocus();
        if (selectedIndex.get() < getItems().size() - 1) {
            getSelectionModel().clearAndSelect(selectedIndex.get() + 1);
-           scrollAndShow(selectedIndex.get() + 1);
+           scrollTo(selectedIndex.get() + 1);
            selectedIndex = Optional.of(selectedIndex.get() + 1);
            onItemSelected.accept(selectedIndex.get());
        }
