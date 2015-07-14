@@ -4,23 +4,30 @@ import backend.Logic;
 import backend.UIManager;
 import browserview.BrowserComponent;
 import browserview.BrowserComponentStub;
+
 import com.google.common.eventbus.EventBus;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
+
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import prefs.Preferences;
 import ui.components.HTStatusBar;
 import ui.components.KeyboardShortcuts;
@@ -38,6 +45,7 @@ import util.events.testevents.UILogicRefreshEventHandler;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class UI extends Application implements EventDispatcher {
@@ -74,6 +82,7 @@ public class UI extends Application implements EventDispatcher {
     private MenuControl menuBar;
     private BrowserComponent browserComponent;
     private RepositorySelector repoSelector;
+    private Label apiBox;
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -191,11 +200,13 @@ public class UI extends Application implements EventDispatcher {
 
     private void initUI(Stage stage) {
         repoSelector = createRepoSelector();
+        apiBox = new Label("-/-");
+
         mainStage = stage;
         stage.setMaximized(false);
 
         panels = new PanelControl(this, prefs);
-        guiController = new GUIController(this, panels);
+        guiController = new GUIController(this, panels, apiBox);
 
         Scene scene = new Scene(createRoot());
         setupMainStage(scene);
@@ -328,7 +339,15 @@ public class UI extends Application implements EventDispatcher {
         HBox.setHgrow(panelsScrollPane, Priority.ALWAYS);
 
         menuBar = new MenuControl(this, panels, panelsScrollPane, prefs);
-        top.getChildren().addAll(menuBar, repoSelector);
+        menuBar.setUseSystemMenuBar(true);
+
+        HBox repoSelectorBar = new HBox();
+        repoSelectorBar.setAlignment(Pos.CENTER_LEFT);
+        apiBox.getStyleClass().add("text-grey");
+        apiBox.setTooltip(new Tooltip("Remaining calls / Minutes to next refresh"));
+        repoSelectorBar.getChildren().addAll(repoSelector, apiBox);
+
+        top.getChildren().addAll(menuBar, repoSelectorBar);
 
         BorderPane root = new BorderPane();
         root.setTop(top);
@@ -442,6 +461,24 @@ public class UI extends Application implements EventDispatcher {
         triggerEvent(new PrimaryRepoChangedEvent(repoId));
         logic.openPrimaryRepository(repoId);
         logic.setDefaultRepo(repoId);
+    }
+    
+    public void switchDefaultRepo(){
+        String[] openRepos = repoSelector.getContents().toArray(new String[0]);
+        String currentRepo = logic.getDefaultRepo();
+        
+        // Cycle to the next open repository
+        for (int i = 0; i < openRepos.length; i++) {
+            if (openRepos[i].equals(currentRepo)) {
+                if (i == openRepos.length - 1) {
+                    primaryRepoChanged(openRepos[0]);
+                    repoSelector.setText(openRepos[0]);
+                } else {
+                    primaryRepoChanged(openRepos[i + 1]);
+                    repoSelector.setText(openRepos[i + 1]);
+                }
+            }
+        }
     }
 
     private void ensureSelectedPanelHasFocus() {
