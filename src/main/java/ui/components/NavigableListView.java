@@ -1,5 +1,6 @@
 package ui.components;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import org.apache.logging.log4j.LogManager;
@@ -93,7 +94,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
             // Select that item
             getSelectionModel().clearAndSelect(index);
             selectedIndex = Optional.of(index);
-            scrollTo(index);
+            scrollAndShow(index);
             // Do not trigger event; selection did not conceptually change
         } else {
             // The item disappeared
@@ -111,7 +112,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
 
                 // The next item will be considered selected
                 onItemSelected.accept(nextIndex);
-                scrollTo(nextIndex);
+                scrollAndShow(nextIndex);
             }
         }
     }
@@ -181,7 +182,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
         selectedIndex = Optional.of(newIndex);
 
         // Ensure that the newly-selected item is in view
-        scrollTo(newIndex);
+        scrollAndShow(newIndex);
     }
 
     public void setOnItemSelected(IntConsumer callback) {
@@ -192,7 +193,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
         requestFocus();
         if (getItems().size() == 0) return;
         getSelectionModel().clearAndSelect(0);
-        scrollTo(0);
+        scrollAndShow(0);
         selectedIndex = Optional.of(0);
         onItemSelected.accept(selectedIndex.get());
     }
@@ -201,7 +202,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
         requestFocus();
         if (getItems().size() == 0) return;
         getSelectionModel().clearAndSelect(getItems().size() - 1);
-        scrollTo(getItems().size() - 1);
+        scrollAndShow(getItems().size() - 1);
         selectedIndex = Optional.of(getItems().size() - 1);
         onItemSelected.accept(selectedIndex.get());
     }
@@ -210,7 +211,7 @@ public abstract class NavigableListView<T> extends ListView<T> {
        requestFocus();
        if (selectedIndex.get() < getItems().size() - 1) {
            getSelectionModel().clearAndSelect(selectedIndex.get() + 1);
-           scrollTo(selectedIndex.get() + 1);
+           scrollAndShow(selectedIndex.get() + 1);
            selectedIndex = Optional.of(selectedIndex.get() + 1);
            onItemSelected.accept(selectedIndex.get());
        }
@@ -219,4 +220,21 @@ public abstract class NavigableListView<T> extends ListView<T> {
     public Optional<T> getSelectedItem() {
         return selectedIndex.map(getItems()::get);
     }
+
+    private VirtualFlow<?> getVirtualFlow() {
+        return (VirtualFlow<?>) lookup("VirtualFlow");
+    }
+
+    public void scrollAndShow(int newIndex) {
+        final VirtualFlow<?> flow = getVirtualFlow();
+        if (flow.getFirstVisibleCellWithinViewPort() == null
+                || flow.getLastVisibleCellWithinViewPort() == null) {
+            // These are null for an unknown reason; just use scrollTo
+            scrollTo(newIndex);
+        } else if (newIndex < flow.getFirstVisibleCellWithinViewPort().getIndex()
+                || newIndex > flow.getLastVisibleCellWithinViewPort().getIndex()) {
+            scrollTo(newIndex);
+        }
+    }
+
 }
