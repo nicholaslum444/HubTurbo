@@ -8,10 +8,11 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import ui.UI;
 import ui.components.Notification;
+import undo.Action;
 import util.DialogMessage;
-import util.GitHubURL;
 import util.events.ShowLabelPickerEventHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,18 +50,21 @@ public class LabelPicker {
     private void replaceLabels(TurboIssue issue, List<String> labels) {
         List<String> originalLabels = issue.getLabels().stream().sorted().collect(Collectors.toList());
         if (!labels.equals(originalLabels)) {
+            List<Action> actions = createListOfActions(originalLabels, labels);
+            List<String> resultingLabels = applyActionsToLabels(originalLabels, actions);
+            assert(labels.equals(resultingLabels));
             ui.logic.replaceIssueLabelsUI(issue, labels);
             Notification undoNotification = new Notification(createInfoOcticon(),
                     "Undo label change(s) for #" + issue.getId() + ": " + issue.getTitle(),
                     "Undo",
                     () -> ui.logic.replaceIssueLabelsRepo(issue, labels, originalLabels)
-                            .thenApply(success -> postReplaceLabelActions(success, issue)),
+                            .thenApply(success -> showErrorDialogOnFailure(success, issue)),
                     () -> ui.logic.replaceIssueLabelsUI(issue, originalLabels));
             ui.showNotification(undoNotification);
         }
     }
 
-    private boolean postReplaceLabelActions(Boolean success, TurboIssue issue) {
+    private boolean showErrorDialogOnFailure(Boolean success, TurboIssue issue) {
         if (!success) {
             // if not successful, show error dialog
             Platform.runLater(() -> DialogMessage.showErrorDialog(
@@ -81,6 +85,33 @@ public class LabelPicker {
         label.setPadding(new Insets(0, 0, 5, 0));
         label.getStyleClass().addAll("octicon");
         return label;
+    }
+
+    private List<Action> createListOfActions(List<String> originalLabels, List<String> newLabels) {
+        List<Action> changedActions = new ArrayList<>();
+        originalLabels.stream().forEach(originalLabel -> {
+            if (!newLabels.contains(originalLabel)) {
+                changedActions.add(new Action(Action.Type.LABEL, originalLabel, Action.Operation.REMOVE));
+            }
+        });
+        newLabels.stream().forEach(newLabel -> {
+            if (!originalLabels.contains(newLabel)) {
+                changedActions.add(new Action(Action.Type.LABEL, newLabel, Action.Operation.ADD));
+            }
+        });
+        return changedActions;
+    }
+
+    private List<String> applyActionsToLabels(List<String> originalLabels, List<Action> actions) {
+        List<String> resultingLabels = new ArrayList<>(originalLabels);
+        actions.stream().forEach(action -> {
+            if (action.operation == Action.Operation.ADD) {
+                resultingLabels.add(action.value);
+            } else {
+                resultingLabels.remove(action.value);
+            }
+        });
+        return resultingLabels;
     }
 
 }
