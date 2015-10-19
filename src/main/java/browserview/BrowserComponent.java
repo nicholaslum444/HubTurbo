@@ -211,6 +211,11 @@ public class BrowserComponent {
         }
         runBrowserOperation(() -> scrollToBottom());
     }
+    
+    public void loadUrl(String url) {
+        logger.info("Loading new page");
+        runBrowserOperation(() -> driver.get(url, false));
+    }
 
     public void jumpToComment(){
         if (isTestChromeDriver) {
