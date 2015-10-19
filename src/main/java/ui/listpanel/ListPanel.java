@@ -25,6 +25,7 @@ import util.events.IssueSelectedEvent;
 import util.events.ShowLabelPickerEvent;
 import backend.interfaces.IModel;
 import backend.resource.TurboIssue;
+import browserview.BrowserComponent;
 import filter.expression.Qualifier;
 
 public class ListPanel extends FilterPanel {
@@ -247,6 +248,9 @@ public class ListPanel extends FilterPanel {
                     listView.selectNthItem(entry.getKey());
                     break;
                 }
+            }
+            if (SHOW_RELATED_ISSUE_OR_PR.match(event)) {
+                ui.getBrowserComponent().loadUrl(listView.getSelectedItem().get().getRelatedIssueOrPRUrl().get());
             }
         });
     }
