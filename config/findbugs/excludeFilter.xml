@@ -54,7 +54,6 @@
     <Match>
         <Or>
             <Class name="unstable.SavedLoginTest"/>
-            <Class name="guitests.WrongLastViewedTest"/>
         </Or>
         <Method name="setupMethod" />
         <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />

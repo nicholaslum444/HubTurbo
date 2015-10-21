@@ -16,6 +16,7 @@ branches:
   only:
     - master
     - release
+    - 1004-test-ci
 
 before_install:
     - "export DISPLAY=:99.0"
