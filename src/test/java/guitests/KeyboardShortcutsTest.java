@@ -186,7 +186,7 @@ public class KeyboardShortcutsTest extends UITest {
 
         // mark as read
         ListPanel issuePanel = find("#dummy/dummy_col1");
-        // mark a   s read an issue that has another issue below it
+        // mark as read an issue that has another issue below it
         push(KeyCode.HOME);
         // focus should change to the issue below
         int issueIdBeforeMark = selectedIssueId;

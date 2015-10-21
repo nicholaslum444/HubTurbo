@@ -58,6 +58,7 @@ public class GUIController {
      * @param e The ModelUpdatedEvent triggered by the uiManager.
      */
     private void modelUpdated(ModelUpdatedEvent e) {
+        System.out.println("dummy/dummy is present: " + e.model.getModelById("dummy/dummy").isPresent());
         panelControl.updateModel(e.model); // Updates model, to be used to display issue labels.
 
         panelControl.getChildren().stream()
