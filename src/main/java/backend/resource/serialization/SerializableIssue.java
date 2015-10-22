@@ -20,7 +20,6 @@ public class SerializableIssue {
     private Optional<String> assignee = Optional.empty();
     private List<String> labels = new ArrayList<>();
     private Optional<Integer> milestone = Optional.empty();
-    private Optional<String> relatedIssueOrPRUrl = Optional.empty();
 
     public SerializableIssue(TurboIssue issue) {
         this.id = issue.getId();
@@ -35,7 +34,6 @@ public class SerializableIssue {
         this.assignee = issue.getAssignee();
         this.labels = issue.getLabels();
         this.milestone = issue.getMilestone();
-        this.relatedIssueOrPRUrl = issue.getRelatedIssueOrPRUrl();
     }
 
     public int getId() {
@@ -74,9 +72,6 @@ public class SerializableIssue {
     public Optional<Integer> getMilestone() {
         return milestone;
     }
-    public Optional<String> getRelatedIssueOrPRUrl() {
-        return relatedIssueOrPRUrl;
-    }
 
     @Override
     public String toString() {
@@ -93,7 +88,6 @@ public class SerializableIssue {
                 + "  assignee: %s,%n"
                 + "  labels: %s,%n"
                 + "  milestone: %s,%n"
-                + "  relatedIssueOrPRUrl: %s,%n"
                 + "}";
 
         return String.format(
@@ -103,7 +97,6 @@ public class SerializableIssue {
                 getCommentCount(), isOpen(),
                 getAssignee().isPresent() ? getAssignee().get() : "",
                 getLabels(),
-                getMilestone().isPresent() ? getMilestone().get().toString() : "",
-                getRelatedIssueOrPRUrl().isPresent() ? getRelatedIssueOrPRUrl().get() : "");
+                getMilestone().isPresent() ? getMilestone().get().toString() : "");
     }
 }
