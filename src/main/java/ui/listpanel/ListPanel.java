@@ -20,12 +20,12 @@ import ui.components.IssueListView;
 import ui.components.KeyboardShortcuts;
 import ui.issuepanel.FilterPanel;
 import ui.issuepanel.PanelControl;
+import util.GithubURLPageElements;
 import util.KeyPress;
 import util.events.IssueSelectedEvent;
 import util.events.ShowLabelPickerEvent;
 import backend.interfaces.IModel;
 import backend.resource.TurboIssue;
-import browserview.BrowserComponent;
 import filter.expression.Qualifier;
 
 public class ListPanel extends FilterPanel {
@@ -249,8 +249,17 @@ public class ListPanel extends FilterPanel {
                     break;
                 }
             }
-            if (SHOW_RELATED_ISSUE_OR_PR.match(event)) {
-                ui.getBrowserComponent().loadUrl(listView.getSelectedItem().get().getRelatedIssueOrPRUrl().get());
+            if (SHOW_RELATED_ISSUE_OR_PR.match(event) && ui.getBrowserComponent().isCurrentUrlIssue()) {
+                TurboIssue issue = listView.getSelectedItem().get();
+                Optional<String> relatedIssueNumber = listView.getSelectedItem().get().isPullRequest()
+                    ? GithubURLPageElements.extractIssueNumber(listView.getSelectedItem().get().getDescription())
+                    : ui.getBrowserComponent().getPRNumberFromIssue();
+                if (relatedIssueNumber.isPresent()){
+                    ui.triggerEvent(
+                            new IssueSelectedEvent(issue.getRepoId(), 
+                               Integer.parseInt(relatedIssueNumber.get()), panelIndex, issue.isPullRequest())
+                    );
+                }
             }
         });
     }

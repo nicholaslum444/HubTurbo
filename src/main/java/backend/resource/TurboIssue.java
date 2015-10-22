@@ -2,12 +2,10 @@ package backend.resource;
 
 import backend.IssueMetadata;
 import backend.resource.serialization.SerializableIssue;
-
 import org.apache.logging.log4j.Logger;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.Label;
 import org.eclipse.egit.github.core.PullRequest;
-
 import prefs.Preferences;
 import util.HTLog;
 import util.Utility;
@@ -16,8 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static util.Utility.replaceNull;
@@ -47,6 +43,7 @@ public class TurboIssue {
     private final LocalDateTime createdAt;
     private final boolean isPullRequest;
 
+
     // Mutable
     private String title;
     private String description;
@@ -56,7 +53,6 @@ public class TurboIssue {
     private Optional<String> assignee;
     private List<String> labels;
     private Optional<Integer> milestone;
-    private Optional<String> relatedIssueOrPRUrl;
 
     /**
      * Metadata associated with issues that is not serialized.
@@ -121,7 +117,6 @@ public class TurboIssue {
         this.metadata = issue.metadata;
         this.repoId = issue.repoId;
         this.markedReadAt = issue.markedReadAt;
-        this.relatedIssueOrPRUrl = issue.relatedIssueOrPRUrl;
     }
 
     public TurboIssue(String repoId, Issue issue) {
@@ -153,18 +148,6 @@ public class TurboIssue {
         this.metadata = IssueMetadata.empty();
         this.repoId = repoId;
         this.markedReadAt = Optional.empty();
-        this.relatedIssueOrPRUrl = setrelatedIssueOrPRUrl(issue);
-    }
-
-    private Optional<String> setrelatedIssueOrPRUrl(Issue issue) {
-        if (isPullRequest(issue) && issue.getBodyText() != null) {
-            Pattern p = Pattern.compile("Fixes <a href=\"(.*?)\"", Pattern.DOTALL);
-            Matcher m = p.matcher(issue.getBodyHtml());
-            while (m.find()) {
-                return Optional.of(m.group(1));
-            }
-        }
-        return Optional.empty();
     }
 
     public TurboIssue(String repoId, SerializableIssue issue) {
@@ -185,7 +168,6 @@ public class TurboIssue {
         this.metadata = IssueMetadata.empty();
         this.repoId = repoId;
         this.markedReadAt = Optional.empty();
-        this.relatedIssueOrPRUrl = issue.getRelatedIssueOrPRUrl();
     }
 
     private void ______CONSTRUCTOR_HELPER_FUNCTIONS______() {
@@ -207,7 +189,6 @@ public class TurboIssue {
 
         this.metadata = IssueMetadata.empty();
         this.markedReadAt = Optional.empty();
-        this.relatedIssueOrPRUrl = Optional.empty();
     }
 
     /**
@@ -431,10 +412,6 @@ public class TurboIssue {
         setMarkedReadAt(Optional.empty());
         prefs.clearMarkedReadAt(getRepoId(), getId());
     }
-    
-    public Optional<String> getRelatedIssueOrPRUrl() {
-        return relatedIssueOrPRUrl;
-    }
 
     /**
      * Metadata is not considered for equality.
@@ -456,8 +433,7 @@ public class TurboIssue {
                 !(milestone != null ? !milestone.equals(issue.milestone) : issue.milestone != null) &&
                 !(title != null ? !title.equals(issue.title) : issue.title != null) &&
                 !(updatedAt != null ? !updatedAt.equals(issue.updatedAt) : issue.updatedAt != null) &&
-                !(markedReadAt != null ? !markedReadAt.equals(issue.markedReadAt) : issue.markedReadAt != null) &&
-                !(relatedIssueOrPRUrl != null ? !relatedIssueOrPRUrl.equals(issue.relatedIssueOrPRUrl) : issue.relatedIssueOrPRUrl != null);
+                !(markedReadAt != null ? !markedReadAt.equals(issue.markedReadAt) : issue.markedReadAt != null);
     }
 
     @Override
@@ -475,7 +451,6 @@ public class TurboIssue {
         result = 31 * result + (assignee != null ? assignee.hashCode() : 0);
         result = 31 * result + (labels != null ? labels.hashCode() : 0);
         result = 31 * result + (milestone != null ? milestone.hashCode() : 0);
-        result = 31 * result + (relatedIssueOrPRUrl != null ? relatedIssueOrPRUrl.hashCode() : 0);
         return result;
     }
 }
