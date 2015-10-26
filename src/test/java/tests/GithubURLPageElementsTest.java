@@ -12,7 +12,7 @@ public class GithubURLPageElementsTest {
     public void gitHubURLPageElementTest() {
         assertEquals("123", GithubURLPageElements.extractIssueNumber("fixes #123").get());
         assertEquals("123", GithubURLPageElements.extractIssueNumber("Closed #123. This is dummy").get());
-        assertEquals("123", GithubURLPageElements.extractIssueNumber("refer to #144. Closed #123. This is dummy").get());
+        assertEquals("123", GithubURLPageElements.extractIssueNumber("refer to #144. Closed #123. This is du").get());
         assertNotEquals("131", GithubURLPageElements.extractIssueNumber("fixes #123").get());
     }
 }

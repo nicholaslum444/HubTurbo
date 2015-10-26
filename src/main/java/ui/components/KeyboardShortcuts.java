@@ -98,7 +98,7 @@ public class KeyboardShortcuts {
     public static final KeyCodeCombination SHOW_CONTRIBUTORS =
             new KeyCodeCombination(KeyCode.D);
     public static final KeyCodeCombination SHOW_RELATED_ISSUE_OR_PR =
-            new KeyCodeCombination(KeyCode.Q);
+            new KeyCodeCombination(KeyCode.E);
 
     public static final Map<Integer, KeyCodeCombination> JUMP_TO_NTH_ISSUE_KEYS = populateJumpToNthIssueMap();
 

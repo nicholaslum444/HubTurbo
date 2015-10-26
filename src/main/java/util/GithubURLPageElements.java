@@ -23,12 +23,12 @@ public class GithubURLPageElements {
     public static final String SCROLL_DOWN = "window.scrollBy(0, 100)";
     
     //Extract Issue Number from issue description
-    public static final Pattern issueNumberPattern = Pattern.compile(
+    public static final Pattern ISSUE_NUMBER_PATTERN = Pattern.compile(
         "(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved) #(\\d+)", 
         Pattern.CASE_INSENSITIVE);
 
     public static Optional<String> extractIssueNumber(String text) {
-        Matcher m = issueNumberPattern.matcher(text);
+        Matcher m = ISSUE_NUMBER_PATTERN.matcher(text);
         if (m.find()) {
             return Optional.of(m.group(2));
         }
